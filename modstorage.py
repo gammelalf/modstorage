@@ -11,41 +11,10 @@ def _check_dependencies(deps):
             raise modlib.ModNotInStorage(mod)
 
 
-def none(args):
-    pass
-
-
-def add(args):
-    _check_dependencies(args.dependencies)
-    mod = modlib.get_mod(args.mod)
-    url = ''
-    # if args.url:
-    #     url = args.url
-    modlib.mod_add_version(mod, args.version, args.jar, url)
-    if len(args.dependencies):
-        modlib.mod_add_dependencies(mod, args.version, *args.dependencies)
-
-
-def get(args):
-    _check_dependencies(args.dependencies)
-    mod = modlib.get_mod(args.mod)
-    if mod['curse_page']:
-        import curselib
-        jar = curselib.download_mod(mod['curse_page']+'/files', args.version)
-        modlib.mod_add_version(mod, args.version, jar)
-        if len(args.dependencies):
-            modlib.mod_add_dependencies(mod, args.version, *args.dependencies)
-    else:
-        raise NotImplementedError('Get only with curseforge url implemented')
-
-
-def new(args):
-    if args.mod in modlib.STORED_MODS:
-        raise modlib.ModAlreadyInStorage
-    if args.curse_page:
-        modlib.new_mod(args.mod, args.curse_page)
-    else:
-        modlib.new_mod(args.mod)
+def storage(args):
+    if args.list:
+        for mod in modlib.STORED_MODS:
+            print(mod)
 
 
 def pack(args):
@@ -62,40 +31,72 @@ def pack(args):
         modlib.pack_fix_missing(pack)
 
 
+def mod(args):
+    if args.new:
+        modlib.new_mod(args.mod)
+    mod = modlib.get_mod(args.mod)
+    if args.c:
+        mod['curse_page'] = args.c
+        modlib.write_mod(mod)
+    if args.get:
+        if mod['curse_page']:
+            if args.v:
+                import curselib
+                jar = curselib.download_mod(mod['curse_page']+'/files', args.v)
+                modlib.mod_add_version(mod, args.v, jar)
+            else:
+                args.parser.error('option -v is required')
+        else:
+            args.parser.error('missing curseforge page')
+    elif args.add:
+        if args.v:
+            modlib.mod_add_version(mod, args.v, args.add)
+        else:
+            args.parser.error('option -v is required')
+    if args.d:
+        if args.v:
+            _check_dependencies(args.d)
+            modlib.mod_add_dependencies(mod, args.v, *args.d)
+        else:
+            args.parser.error('option -v is required')
+
+
 def main():
     main_parser = argparse.ArgumentParser()
-    main_parser.set_defaults(func=none)
+    main_parser.add_argument('-l', '--list', action='store_true',
+                             help='list all mods in the storage')
+    main_parser.set_defaults(func=storage)
     subparsers = main_parser.add_subparsers()
 
-    new_parser = subparsers.add_parser('new', description='Add a new mod to \
-                                                           the storage')
-    new_parser.add_argument('mod')
-    new_parser.add_argument('curse_page', nargs='?')
-    new_parser.set_defaults(func=new)
+    mod_parser = subparsers.add_parser('mod')
+    mod_parser.add_argument('mod',
+                            help='mod to work on')
+    mod_parser.add_argument('-n', '--new', action='store_true',
+                            help='create a new mod')
+    mod_parser.add_argument('-c', metavar='url',
+                            help='set url to curseforge')
+    group = mod_parser.add_mutually_exclusive_group()
+    group.add_argument('-g', '--get', action='store_true',
+                       help='download a version from curseforge')
+    group.add_argument('-a', '--add', metavar='file',
+                       help='add a version from a file')
+    mod_parser.add_argument('-v', metavar='version',
+                            help='minecraft version, required for -a, -d, -g')
+    mod_parser.add_argument('-d', metavar='dependency', nargs='+',
+                            help='add dependencies')
+    mod_parser.set_defaults(func=mod, parser=mod_parser)
 
-    add_parser = subparsers.add_parser('add', description='Add a version to \
-                                                           a mod')
-    add_parser.add_argument('mod')
-    add_parser.add_argument('version')
-    add_parser.add_argument('jar')
-    add_parser.add_argument('dependencies', nargs='*')
-    add_parser.set_defaults(func=add)
-
-    get_parser = subparsers.add_parser('get', description='Download from \
-                                                           curseforge and add \
-                                                           a version to a mod')
-    get_parser.add_argument('mod')
-    get_parser.add_argument('version')
-    get_parser.add_argument('dependencies', nargs='*')
-    get_parser.set_defaults(func=get)
-
-    pack_parser = subparsers.add_parser('pack', description='Work on packs')
+    pack_parser = subparsers.add_parser('pack')
     pack_parser.add_argument('pack')
-    pack_parser.add_argument('-l', '--list', action='store_true')
-    pack_parser.add_argument('-a', '--add', metavar='mod')
-    pack_parser.add_argument('-f', '--fix', action='store_true')
-    pack_parser.add_argument('-n', '--new', metavar='version')
-    pack_parser.set_defaults(func=pack)
+    pack_parser.add_argument('-l', '--list', action='store_true',
+                             help='list all mods in the pack')
+    pack_parser.add_argument('-a', '--add', metavar='mod',
+                             help='add a mod to the pack')
+    pack_parser.add_argument('-f', '--fix', action='store_true',
+                             help='fix the pack\'s missing dependencies')
+    pack_parser.add_argument('-n', '--new', metavar='version',
+                             help='create a new pack')
+    pack_parser.set_defaults(func=pack, parser=pack_parser)
 
     args = main_parser.parse_args()
     args.func(args)
