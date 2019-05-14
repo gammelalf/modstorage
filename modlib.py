@@ -297,3 +297,24 @@ def pack_fix_missing(pack):
             pack_add_mod(pack, get_mod(mod), False)
         missing = pack_get_missing(pack)
     write_pack(pack)
+
+
+# -- BUNDLE FUNCTIONS -- #
+
+'''
+A bundle is a list/ collection of mods.
+It can be added as a whole to a pack.
+'''
+
+
+def pack_add_bundle(pack, bundle):
+    '''
+    Add a bundle's mods to a pack
+
+    :param pack:
+    :param bundle:
+    '''
+    for mod in bundle:
+        if mod not in pack['mods']:
+            pack_add_mod(pack, mod, False)
+    write_pack(pack)

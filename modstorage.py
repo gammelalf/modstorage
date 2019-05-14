@@ -21,9 +21,9 @@ def add(args):
     url = ''
     # if args.url:
     #     url = args.url
-    modlib.add_version(mod, args.version, args.jar, url)
+    modlib.mod_add_version(mod, args.version, args.jar, url)
     if len(args.dependencies):
-        modlib.add_dependencies(mod, args.version, *args.dependencies)
+        modlib.mod_add_dependencies(mod, args.version, *args.dependencies)
 
 
 def get(args):
@@ -32,9 +32,9 @@ def get(args):
     if mod['curse_page']:
         import curselib
         jar = curselib.download_mod(mod['curse_page']+'/files', args.version)
-        modlib.add_version(mod, args.version, jar)
+        modlib.mod_add_version(mod, args.version, jar)
         if len(args.dependencies):
-            modlib.add_dependencies(mod, args.version, *args.dependencies)
+            modlib.mod_add_dependencies(mod, args.version, *args.dependencies)
     else:
         raise NotImplementedError('Get only with curseforge url implemented')
 
