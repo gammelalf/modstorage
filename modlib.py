@@ -31,6 +31,12 @@ LOADED_MODS = {}
 
 
 def path(name, file=''):
+    '''
+    Generate the path to a mod
+
+    :param name: mod's name
+    :param file: file inside mod's directory (optional)
+    '''
     if file:
         return os.path.join(CONFIG['path'],
                             name.lower().replace(' ', '_'),
@@ -41,18 +47,17 @@ def path(name, file=''):
 
 
 def adv_path(mod, mc_v, key):
+    '''
+    Generate the path to a mod's file
+
+    :param mod: dict representing the mod
+    :param mc_v: minecraft version
+    :param key: file to access ('link'/ 'jar')
+    '''
     return path(mod['name'], mod['versions'][mc_v][key])
 
 
 # -- MOD FUNCTIONS -- #
-
-def mod_pattern():
-    return {'name': '', 'versions': {}, 'curse_page': ''}
-
-
-def version_pattern():
-    return {'jar': '', 'link': '', 'url': '', 'deps': []}
-
 
 def new_mod(name, curse_page=''):
     '''
@@ -71,7 +76,8 @@ def new_mod(name, curse_page=''):
     with open('{}/stored_mods.json'.format(CONFIG['path']), 'w') as f:
         json.dump(STORED_MODS, f)
 
-    LOADED_MODS[name] = mod_pattern()
+    LOADED_MODS[name] = {}
+    LOADED_MODS[name]['versions'] = {}
     LOADED_MODS[name]['name'] = name
     LOADED_MODS[name]['curse_page'] = curse_page
     os.mkdir(path(name))
@@ -80,7 +86,7 @@ def new_mod(name, curse_page=''):
     return LOADED_MODS[name]
 
 
-def add_version(mod, mc_v, file, url=''):
+def mod_add_version(mod, mc_v, file, url=''):
     '''
     Add a java-file to a mod for a specific version
     Add the version to the mod's dict
@@ -93,17 +99,18 @@ def add_version(mod, mc_v, file, url=''):
     if not os.path.isfile(file):
         raise IOError('File {} not found'.format(file))
 
-    mod['versions'][mc_v] = version_pattern()
+    mod['versions'][mc_v] = {}
     mod['versions'][mc_v]['jar'] = os.path.basename(file)
     os.rename(file, adv_path(mod, mc_v, 'jar'))
     mod['versions'][mc_v]['link'] = mod['name']+' v'+mc_v+'.jar'
     os.symlink(os.path.abspath(adv_path(mod, mc_v, 'jar')),
                adv_path(mod, mc_v, 'link'))
     mod['versions'][mc_v]['url'] = url
+    mod['versions'][mc_v]['deps'] = {}
     write_mod(mod)
 
 
-def update_version(mod, mc_v, file, url=''):
+def mod_update_version(mod, mc_v, file, url=''):
     '''
     Add a java-file to a mod replaceing an existing one
 
@@ -120,7 +127,7 @@ def update_version(mod, mc_v, file, url=''):
     write_mod(mod)
 
 
-def add_dependencies(mod, mc_v, dep, *deps):
+def mod_add_dependencies(mod, mc_v, dep, *deps):
     '''
     Add a dependency for a mod's version
 
@@ -135,7 +142,7 @@ def add_dependencies(mod, mc_v, dep, *deps):
     write_mod(mod)
 
     for d in deps:
-        add_dependencies(mod, mc_v, d)
+        mod_add_dependencies(mod, mc_v, d)
 
 
 def write_mod(name):
@@ -172,15 +179,6 @@ def get_mod(name):
 
 # -- PACK FUNCTIONS -- #
 
-def pack_pattern():
-    '''
-    Return a dict representing an empty pack to be filled with data
-
-    :returns: dict representing an empty pack
-    '''
-    return {'path': '', 'version': '', 'mods': []}
-
-
 def new_pack(path, version):
     '''
     Create a pack
@@ -193,9 +191,10 @@ def new_pack(path, version):
         raise NotADirectoryError('Can\'t create pack')
     if os.path.isfile(os.path.join(path, 'pack.json')):
         raise IOError('pack.json already exists')
-    pack = pack_pattern()
+    pack = {}
     pack['path'] = os.path.abspath(path)
     pack['version'] = version
+    pack['mods'] = []
     write_pack(pack)
     return pack
 
