@@ -106,7 +106,7 @@ def mod_add_version(mod, mc_v, file, url=''):
     os.symlink(os.path.abspath(adv_path(mod, mc_v, 'jar')),
                adv_path(mod, mc_v, 'link'))
     mod['versions'][mc_v]['url'] = url
-    mod['versions'][mc_v]['deps'] = {}
+    mod['versions'][mc_v]['deps'] = []
     write_mod(mod)
 
 
