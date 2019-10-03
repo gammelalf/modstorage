@@ -1,54 +1,28 @@
 import requests
-from xml.etree import ElementTree
+#from xml.etree import ElementTree
+
+
+version_map = {'1.7.10': '2020709689:4449',
+               '1.12.2': '2020709689:6756',
+               '1.10.2': '2020709689:6170'}
 
 
 def download_mod(url, version):
     '''
     Download mod for version from
-        https://minecraft.curseforge.com/projects/<mod>/files
+        https://www.curseforge.com/minecraft/mc-mods/<mod>/files
 
     :param url:
     :param version: minecraft version
     '''
-    options = get_options(url)
-    if version not in options.keys():
-        raise RuntimeError('Given version is not available')
-    url += '?filter-game-version='+options[version]
+    #options = get_options(url)
+    #if version not in options.keys():
+    #    raise RuntimeError('Given version is not available')
+    url += '?filter-game-version='+version_map[version]
     url = get_download(url)
+    if url is None:
+        raise RuntimeError('Given verison is not available')
     return download_url(url)
-
-
-def get_options(url):
-    '''
-    Read available versions from
-        https://minecraft.curseforge.com/projects/<mod>/files
-
-    :param url:
-    :returns: dict containing available versions and their php representation
-    '''
-    # Get page
-    with requests.get(url) as r:
-        html = str(r.content)
-
-    # Rough filter to decrease parser's load
-    start = html.find('<select id="filter-game-version"')
-    end = html.find('</select>', start)+9
-    select = html[start:end]
-
-    # Tidy up
-    select = select.replace('\\r', '\r')
-    select = select.replace('\\n', '\n')
-
-    # Parse XML
-    options = {}
-    root = ElementTree.fromstring(select)
-    for child in root.getchildren():
-        if not child.text.startswith('\\xc2\\xa0'):
-            continue
-        text = child.text.replace('\\xc2\\xa0', '')
-        if isversion(text):
-            options[text] = child.attrib['value']
-    return options
 
 
 def get_download(url):
@@ -62,18 +36,17 @@ def get_download(url):
     with requests.get(url) as r:
         html = str(r.content)
 
-    # Rough filter to decrease parser's load
-    start = html.find('<div class="project-file-download-button">')
-    end = html.find('</div>', start)+6
-    div = html[start:end]
+    # Find first download
+    tag_start = '<a data-action="file-link" href="'
+    start = html.find(tag_start)
+    if start == -1:
+        return None
+    else:
+        start += len(tag_start)
+        end = html.find('"', start)
 
-    # Tidy up
-    div = div.replace('\\r', '\r')
-    div = div.replace('\\n', '\n')
-
-    # Parse XML
-    root = ElementTree.fromstring(div)
-    return 'https://minecraft.curseforge.com'+root.find('a').attrib['href']
+        return ('https://www.curseforge.com'+html[start:end]) \
+               .replace('/files/', '/download/')+'/file'
 
 
 # Simple Utilities
@@ -109,3 +82,18 @@ def isversion(string):
         else:
             return False
     return True
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', metavar='version',
+                        help='Get filter for version')
+    args = parser.parse_args()
+
+    if args.f:
+        print('?filter-game-version='+version_map[args.f])
+
+
+if __name__ == '__main__':
+    main()
