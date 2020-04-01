@@ -19,6 +19,7 @@ class Mod:
         mod.__name__ = name
         mod.write()
 
+        Mod.__loaded__[mod.__name__] = mod
         return mod
 
     def __new__(cls, mod, *args):
@@ -43,14 +44,57 @@ class Mod:
     def __repr__(self):
         return f"Mod({self.__name__})"
 
-    def get(self, key, version=None):
-        if version is None:
-            self.__data__["default"][key]
+    def __dict__(self):
+        return dict(self.__data__)
+
+    def set(self, key, value, version=None):
+        """
+        Set an attribute value for a version.
+        If no version is specified, it will be set in default.
+        If the specified version doesn't exists yet, it will be created.
+        """
+        # Validate version
+        base.valid_version(version)
+
+        # Use specified version
+        if version is not None:
+
+            # Create version
+            if version not in self.__data__["versions"]:
+                self.__data__["versions"][version] = {}
+
+            # Set value
+            self.__data__["versions"][version][key] = value
+
+        # Set value to default
         else:
-            self.__data__["versions"][version][key]
+            self.__data__["default"][key] = value
+
+
+    def get(self, key, version=None):
+        """
+        Get an version's attribute value
+        If no version is specified or the versions does not have this attribute,
+        it will use default's values.
+        """
+        # Validate version
+        base.valid_version(version)
+
+        # Specified version has the attribute
+        if version is not None and key in self.__data__["versions"][version]:
+            return self.__data__["versions"][version][key]
+
+        # Use default
+        else:
+            return self.__data__["default"][key]
+
 
     def file(self, key, version=None):
+        """
+        Call get and join its return value to the path
+        """
         return base.storage_path(self.__name__, self.get(key, version))
+
 
     def write(self):
         with open(base.storage_path(self.__name__, "mod.json"), "w") as f:
