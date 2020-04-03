@@ -44,8 +44,18 @@ class Mod:
     def __repr__(self):
         return f"Mod({self.__name__})"
 
+    def __str__(self):
+        return self.__name__
+
     def __dict__(self):
         return dict(self.__data__)
+    
+    def __getattr__(self, key):
+        if key == "name":
+            return self.__name__
+        else:
+            return super().__get__attr__(key)
+
 
     def set(self, key, value, version=None):
         """
