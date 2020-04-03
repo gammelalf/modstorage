@@ -15,7 +15,7 @@ class Mod:
         os.mkdir(base.storage_path(name))
 
         mod = object.__new__(Mod)
-        mod.__data__ = {"default": {}, "versions": {}}
+        mod.__data__ = {"general": {}}
         mod.__name__ = name
         mod.write()
 
@@ -37,7 +37,7 @@ class Mod:
         Load data from mod.json
         """
         self.__name__ = mod
-        with open(base.storage_path(self.__name__, "mod.json")) as f:
+        with open(base.storage_pth(self.__name__, "mod.json")) as f:
             self.__data__ = json.load(f)
         Mod.__loaded__[self.__name__] = self
 
@@ -60,15 +60,15 @@ class Mod:
         if version is not None:
 
             # Create version
-            if version not in self.__data__["versions"]:
-                self.__data__["versions"][version] = {}
+            if version not in self.__data__:
+                self.__data__[version] = {}
 
             # Set value
-            self.__data__["versions"][version][key] = value
+            self.__data__[version][key] = value
 
         # Set value to default
         else:
-            self.__data__["default"][key] = value
+            self.__data__["general"][key] = value
 
 
     def get(self, key, version=None):
@@ -81,12 +81,12 @@ class Mod:
         base.valid_version(version)
 
         # Specified version has the attribute
-        if version is not None and key in self.__data__["versions"][version]:
-            return self.__data__["versions"][version][key]
+        if version is not None and key in self.__data__[version]:
+            return self.__data__[version][key]
 
         # Use default
         else:
-            return self.__data__["default"][key]
+            return self.__data__["general"][key]
 
 
     def file(self, key, version=None):
