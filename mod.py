@@ -1,4 +1,4 @@
-import os, json
+import os, shutil, json
 
 import base
 
@@ -15,7 +15,7 @@ class Mod:
         os.mkdir(base.storage_path(name))
 
         mod = object.__new__(Mod)
-        mod.__data__ = {"general": {}}
+        mod.__data__ = {"general": {"dependencies": []}}
         mod.__name__ = name
         mod.write()
 
@@ -37,7 +37,7 @@ class Mod:
         Load data from mod.json
         """
         self.__name__ = mod
-        with open(base.storage_pth(self.__name__, "mod.json")) as f:
+        with open(base.storage_path(self.__name__, "mod.json")) as f:
             self.__data__ = json.load(f)
         Mod.__loaded__[self.__name__] = self
 
@@ -49,17 +49,17 @@ class Mod:
 
     def set(self, key, value, version=None):
         """
-        Set an attribute value for a version.
+        Set an attribute value for a version
         If no version is specified, it will be set in default.
         If the specified version doesn't exists yet, it will be created.
         """
-        # Validate version
-        base.valid_version(version)
-
         # Use specified version
         if version is not None:
 
-            # Create version
+            # Validate version
+            base.valid_version(version)
+
+            # Create version if needed
             if version not in self.__data__:
                 self.__data__[version] = {}
 
@@ -77,26 +77,70 @@ class Mod:
         If no version is specified or the versions does not have this attribute,
         it will use default's values.
         """
-        # Validate version
-        base.valid_version(version)
-
         # Specified version has the attribute
-        if version is not None and key in self.__data__[version]:
-            return self.__data__[version][key]
+        if version is not None:
 
-        # Use default
-        else:
-            return self.__data__["general"][key]
+            # Validate version
+            base.valid_version(version)
+
+            if version in self.__data__ and key in self.__data__[version]:
+                return self.__data__[version][key]
+
+        # Didn't return yet? -> return the "general" value
+        return self.__data__["general"][key]
 
 
     def file(self, key, version=None):
         """
-        Call get and join its return value to the path
+        Call get() and join its return value to the path
         """
         return base.storage_path(self.__name__, self.get(key, version))
 
 
     def write(self):
+        """
+        Write the mod's dict to disk
+
+        Same as save()
+        """
         with open(base.storage_path(self.__name__, "mod.json"), "w") as f:
             json.dump(self.__data__, f, indent=4)
     save = write
+
+
+    def set_file(self, path, version):
+        """
+        Set the mod's file for a version
+        This will move the given file into the mod's directory
+        and creates the symlink.
+        """
+        # Validate version
+        base.valid_version(version)
+
+        # Get file's name
+        name = os.path.basename(path)
+
+        # Set the value's to be used with file()
+        self.set("jar", name, version)
+        self.set("link", f"{version}.jar", version)
+
+        # Move the file
+        shutil.move(path, self.file("jar", version))
+
+        # Delete a possibly existing old link
+        if os.path.lexists(self.file("link", version)): # exists() returns False on broken
+            os.remove(self.file("link", version))       # symlinks. lexists() doesn't.
+
+        # Link the file
+        os.symlink(self.file("jar", version), self.file("link", version))
+
+        # Save
+        self.write()
+
+
+    def link(self, version, destination):
+        os.symlink(self.file("link", version), destination)
+
+
+    def copy(self, version, destination):
+        shutil.copy(self.file("jar", version), destination)

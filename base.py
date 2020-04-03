@@ -1,7 +1,7 @@
 import os
 
 def storage_path(*paths):
-    return os.path.join("./storage", *paths)
+    return os.path.join(os.path.abspath("./storage"), *paths)
 
 def valid_version(version):
     """
