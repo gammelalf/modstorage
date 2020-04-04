@@ -39,7 +39,7 @@ class Pack:
         """
         Return the path to a mod's file in the pack's directory
         """
-        return os.path.join(self.directory, mod.name + ".jar")
+        return os.path.join(self.directory, mod.get("name", self.version) + ".jar")
 
 
     def add(self, mod, manually=True):

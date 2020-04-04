@@ -5,57 +5,51 @@ import base
 
 class Mod:
 
-    __slots__ = ["__data__", "__name__"]
+    __slots__ = ["__data__", "__modid__"]
     __loaded__ = {}
 
-    def new_mod(name):
+    def new_mod(modid):
         """
         Create new mod, its required files and return it
         """
-        os.mkdir(base.storage_path(name))
+        os.mkdir(base.storage_path(modid))
 
         mod = object.__new__(Mod)
-        mod.__data__ = {"general": {"dependencies": []}}
-        mod.__name__ = name
+        mod.__data__ = {"general": {"dependencies": [], "name": modid}}
+        mod.__modid__ = modid
         mod.write()
 
-        Mod.__loaded__[mod.__name__] = mod
+        Mod.__loaded__[mod.__modid__] = mod
         return mod
 
-    def __new__(cls, mod, *args):
+    def __new__(cls, modid, *args):
         """
         Return loaded mod if loaded
         Create mod if not loaded
         """
         try:
-            return Mod.__loaded__[mod]
+            return Mod.__loaded__[modid]
         except:
             return super().__new__(cls)
 
-    def __init__(self, mod):
+    def __init__(self, modid):
         """
         Load data from mod.json
         """
-        self.__name__ = mod
-        with open(base.storage_path(self.__name__, "mod.json")) as f:
+        self.__modid__ = modid
+        with open(base.storage_path(self.__modid__, "mod.json")) as f:
             self.__data__ = json.load(f)
-        Mod.__loaded__[self.__name__] = self
+        Mod.__loaded__[self.__modid__] = self
 
     def __repr__(self):
-        return f"Mod({self.__name__})"
+        return f"Mod({self.__modid__})"
 
     def __str__(self):
-        return self.__name__
+        return self.__modid__
 
     def __dict__(self):
         return dict(self.__data__)
     
-    def __getattr__(self, key):
-        if key == "name":
-            return self.__name__
-        else:
-            return super().__get__attr__(key)
-
 
     def set(self, key, value, version=None):
         """
@@ -104,7 +98,7 @@ class Mod:
         """
         Call get() and join its return value to the path
         """
-        return base.storage_path(self.__name__, self.get(key, version))
+        return base.storage_path(self.__modid__, self.get(key, version))
 
 
     def write(self):
@@ -113,7 +107,7 @@ class Mod:
 
         Same as save()
         """
-        with open(base.storage_path(self.__name__, "mod.json"), "w") as f:
+        with open(base.storage_path(self.__modid__, "mod.json"), "w") as f:
             json.dump(self.__data__, f, indent=4)
     save = write
 
@@ -148,9 +142,3 @@ class Mod:
         self.write()
 
 
-    def link(self, version, destination):
-        os.symlink(self.file("link", version), destination)
-
-
-    def copy(self, version, destination):
-        shutil.copy(self.file("jar", version), destination)
