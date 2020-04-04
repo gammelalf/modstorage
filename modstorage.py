@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 
 import argparse, os
-
-# import modlib
+from zipfile import ZipFile
 
 from mod import Mod
 from pack import Pack
@@ -45,6 +44,16 @@ def mod(args):
         mod.get("dependencies", args.v).extend(args.d)
     mod.write()
 
+    if args.read:
+        if args.v
+            with Zipfile() as jar:
+                with jar.open("mcmod.info") as info:
+                    for key, value in json.load(info)[0].items():
+                        mod.set(key, value, args.v)
+        else:
+            args.parser.error("option -v is required")
+    mod.write()
+
 
 def main():
     # Define some type functions for argparse
@@ -72,6 +81,8 @@ def main():
                             help="create a new mod")
     mod_parser.add_argument("-a", "--add",  metavar="file",
                             help="add a version from a file")
+    mod_parser.add_argument("-r", "--read", action="store_true",
+                            help="Experimental! Read the mcmod.info")
     mod_parser.add_argument("-v", metavar="version", default=None,
                             type=minecraft_version,
                             help="minecraft version")
