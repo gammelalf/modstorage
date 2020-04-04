@@ -1,43 +1,32 @@
 #!/usr/bin/python3
 
-import argparse
+import argparse, os
 
 # import modlib
 
 from mod import Mod
+from pack import Pack
 from base import valid_version
-
-def minecraft_version(string):
-    """
-    Small wrapper for base.valid_version() to be given used as an argument type
-    """
-    valid_version(string)
-    return string
-
-def _check_dependencies(deps):
-    for mod in deps:
-        if mod not in modlib.STORED_MODS:
-            raise modlib.ModNotInStorage(mod)
 
 
 def storage(args):
+    raise NotImplementedError
     if args.list:
         for mod in modlib.STORED_MODS:
             print(mod)
 
 
 def pack(args):
-    if args.new:
-        pack = modlib.new_pack(args.pack, args.new)
-    else:
-        pack = modlib.read_pack(args.pack)
+    pack = Pack(args.pack, *args.new)
     if args.add:
-        modlib.pack_add_mod(pack, modlib.get_mod(args.add))
+        pack.add(args.add)
+    if args.remove:
+        pack.remove(args.remove)
+    if args.clean:
+        pack.autoremove()
     if args.list:
-        for mod in pack["mods"]:
+        for mod in pack.mods:
             print(mod)
-    if args.fix:
-        modlib.pack_fix_missing(pack)
 
 
 def mod(args):
@@ -58,15 +47,27 @@ def mod(args):
 
 
 def main():
+    # Define some type functions for argparse
+    def minecraft_version(string):
+        valid_version(string)
+        return string
+
+    def directory(string):
+        if os.path.exists(string) and os.path.isdir(string):
+            return string
+        else:
+            raise NotADirectoryError(string)
+
+    # Main parser
     main_parser = argparse.ArgumentParser()
     main_parser.add_argument("-l", "--list", action="store_true",
                              help="list all mods in the storage")
     main_parser.set_defaults(func=storage)
     subparsers = main_parser.add_subparsers()
 
+    # Mod parser
     mod_parser = subparsers.add_parser("mod")
-    mod_parser.add_argument("mod",
-                            help="mod to work on")
+    mod_parser.add_argument("mod")
     mod_parser.add_argument("-n", "--new", action="store_true",
                             help="create a new mod")
     mod_parser.add_argument("-a", "--add",  metavar="file",
@@ -78,18 +79,23 @@ def main():
                             help="add dependencies")
     mod_parser.set_defaults(func=mod, parser=mod_parser)
 
+    # Pack parser
     pack_parser = subparsers.add_parser("pack")
     pack_parser.add_argument("pack")
     pack_parser.add_argument("-l", "--list", action="store_true",
                              help="list all mods in the pack")
-    pack_parser.add_argument("-a", "--add", metavar="mod",
+    pack_parser.add_argument("-a", "--add", metavar="mod", type=Mod,
                              help="add a mod to the pack")
-    pack_parser.add_argument("-f", "--fix", action="store_true",
-                             help="fix the pack's missing dependencies")
-    pack_parser.add_argument("-n", "--new", metavar="version",
+    pack_parser.add_argument("-r", "--remove", metavar="mod", type=Mod,
+                             help="remove a mod from the pack")
+    pack_parser.add_argument("-c", "--clean", action="store_true",
+                             help="remove obsolete mods")
+    pack_parser.add_argument("-n", "--new", metavar=("directory", "version"),
+                             nargs=2, default=[],
                              help="create a new pack")
     pack_parser.set_defaults(func=pack, parser=pack_parser)
 
+    # Parse and process
     args = main_parser.parse_args()
     args.func(args)
 
