@@ -2,8 +2,8 @@ import json   # dump, load
 import os     # symlink, remove, path
 import shutil # copy
 
-from modlib.base import valid_version, config, packs_path
-from modlib.mod import Mod
+from .base import valid_version, config, packs_path
+from .mod import Mod
 
 class Pack:
 
@@ -42,7 +42,7 @@ class Pack:
             return super().__getattr__(key)
 
 
-    def __mod_file(self, mod):
+    def _mod_file(self, mod):
         """
         Return the path to a mod's file in the pack's directory
         """
