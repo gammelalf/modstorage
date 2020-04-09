@@ -1,6 +1,8 @@
-import json, os
+import json   # dump, load
+import os     # symlink, remove, path
+import shutil # copy
 
-from modlib.base import valid_version
+from modlib.base import valid_version, config, packs_path
 from modlib.mod import Mod
 
 class Pack:
@@ -9,11 +11,16 @@ class Pack:
         """
         Load a pack from its json file or create a new one
         """
-        self.__file__ = file
+        if os.path.exists(file):
+            self.__file__ = file
+        elif os.path.exists(packs_path(file)):
+            self.__file__ = packs_path(file)
+        else:
+            raise FileNotFoundError(file)
 
         # Just load existing pack
         if directory is None:
-            with open(file) as f:
+            with open(self.__file__) as f:
                 self.__data__ = json.load(f)
 
         # Create new one
@@ -66,8 +73,11 @@ class Pack:
             # Add mod to dependencies' dependants
             self.mods[dep]["dependants"].append(mod.id)
 
-        # Create link and the mod's entry
-        os.symlink(mod.file("link", self.version), self.__mod_file(mod))
+        # Create mod's file and entry
+        if config.getboolean("PACKS", "use symlinks"):
+            os.symlink(mod.file("link", self.version), self.__mod_file(mod))
+        else:
+            shutil.copy(mod.file("jar", self.version), self.__mod_file(mod))
         self.mods[mod.id] = {"manually": manually, "dependants": []}
 
         # Save

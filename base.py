@@ -1,7 +1,39 @@
 import os
 
+from configparser import ConfigParser
+
+
+DEFAULT_CONFIG_STRING = """
+[MODS]
+directory = ./storage
+
+[PACKS]
+directory = ./packs
+use symlinks = True
+"""
+
+config = ConfigParser()
+config.read_string(DEFAULT_CONFIG_STRING)
+config.read([
+        os.path.expanduser("~/.config/modlib"),
+        ".modlib.config"
+    ])
+
+
 def storage_path(*paths):
-    return os.path.join(os.path.abspath("./storage"), *paths)
+    """
+    Create a path inside the mods' storage directory
+    """
+    # abspath is used because the result could be used in symlinks
+    return os.path.join(os.path.abspath(config.get("MODS", "directory")), *paths)
+
+
+def packs_path(*paths):
+    """
+    Create a path inside the packs' storage directory
+    """
+    return os.path.join(config.get("PACKS", "directory"), *paths)
+
 
 def valid_version(version):
     """
@@ -11,7 +43,6 @@ def valid_version(version):
     integers seperated by dots. One could use regular expressions for a preciser
     match. But this is simpler, faster and should do fine enough.
     """
-
     # Custom int() only accepting natural numbers
     def nn(string):
         integer = int(string)

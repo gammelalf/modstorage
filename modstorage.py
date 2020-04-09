@@ -5,14 +5,15 @@ from zipfile import ZipFile
 
 from modlib.mod import Mod
 from modlib.pack import Pack
-from modlib.base import valid_version
+from modlib.base import valid_version, config, DEFAULT_CONFIG_STRING
 
 
 def storage(args):
-    raise NotImplementedError
-    if args.list:
-        for mod in modlib.STORED_MODS:
-            print(mod)
+    if args.config:
+        if os.path.exists(".modlib.config"):
+            raise FileExistsError(".modlib.config")
+        with open(".modlib.config", "w") as f:
+            f.write(DEFAULT_CONFIG_STRING)
 
 
 def pack(args):
@@ -69,8 +70,10 @@ def main():
 
     # Main parser
     main_parser = argparse.ArgumentParser()
-    main_parser.add_argument("-l", "--list", action="store_true",
-                             help="list all mods in the storage")
+    #main_parser.add_argument("-l", "--list", action="store_true",
+    #                         help="list all mods in the storage")
+    main_parser.add_argument("-c", "--config", action="store_true",
+                             help="Write the default config to .modlib.config")
     main_parser.set_defaults(func=storage)
     subparsers = main_parser.add_subparsers()
 
