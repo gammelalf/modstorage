@@ -3,9 +3,8 @@
 import argparse, os
 from zipfile import ZipFile
 
-from modlib.mod import Mod
-from modlib.pack import Pack
-from modlib.base import valid_version, config, DEFAULT_CONFIG_STRING
+from modlib import Mod, Pack
+from modlib.base import config, valid_version
 
 
 def storage(args):
@@ -13,7 +12,7 @@ def storage(args):
         if os.path.exists(".modlib.config"):
             raise FileExistsError(".modlib.config")
         with open(".modlib.config", "w") as f:
-            f.write(DEFAULT_CONFIG_STRING)
+            f.write(config.DEFAULT)
 
 
 def pack(args):

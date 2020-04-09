@@ -3,7 +3,9 @@ import os
 from configparser import ConfigParser
 
 
-DEFAULT_CONFIG_STRING = """
+
+config = ConfigParser()
+config.DEFAULT = """
 [MODS]
 directory = ./storage
 
@@ -11,9 +13,7 @@ directory = ./storage
 directory = ./packs
 use symlinks = True
 """
-
-config = ConfigParser()
-config.read_string(DEFAULT_CONFIG_STRING)
+config.read_string(config.DEFAULT)
 config.read([
         os.path.expanduser("~/.config/modlib"),
         ".modlib.config"
@@ -60,3 +60,5 @@ def valid_version(version):
 
     # The ValueError is outside the exception for cleaner error messages
     raise ValueError(f"{version} is not a proper minecraft version")
+
+
