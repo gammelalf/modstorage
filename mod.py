@@ -1,6 +1,6 @@
 import os, shutil, json
 
-import base
+import modlib.base
 
 
 class Mod:

@@ -3,9 +3,9 @@
 import argparse, os
 from zipfile import ZipFile
 
-from mod import Mod
-from pack import Pack
-from base import valid_version
+from modlib.mod import Mod
+from modlib.pack import Pack
+from modlib.base import valid_version
 
 
 def storage(args):

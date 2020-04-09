@@ -1,7 +1,7 @@
 import json, os
 
-from base import valid_version
-from mod import Mod
+from modlib.base import valid_version
+from modlib.mod import Mod
 
 class Pack:
 
