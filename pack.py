@@ -64,11 +64,11 @@ class Pack:
                 self.add(dep, False)
 
             # Add mod to dependencies' dependants
-            self.mods[dep]["dependants"].append(mod.name)
+            self.mods[dep]["dependants"].append(mod.id)
 
         # Create link and the mod's entry
         os.symlink(mod.file("link", self.version), self.__mod_file(mod))
-        self.mods[mod.name] = {"manually": manually, "dependants": []}
+        self.mods[mod.id] = {"manually": manually, "dependants": []}
 
         # Save
         self.write()
@@ -85,18 +85,18 @@ class Pack:
             mod = Mod(mod)
 
         # Check for errors
-        if mod.name not in self.mods:
+        if mod.id not in self.mods:
             raise RuntimeError(f"{mod} not in pack")
-        if self.mods[mod.name]["dependants"] != []:
+        if self.mods[mod.id]["dependants"] != []:
             raise RuntimeError(f"{mod} still has dependants")
 
         # Remove mod from dependencies' dependants
         for dep in mod.get("dependencies", self.version):
-            self.mods[dep]["dependants"].remove(mod.name)
+            self.mods[dep]["dependants"].remove(mod.id)
 
         # Remove link and entry
         os.remove(self.__mod_file(mod))
-        del self.mods[mod.name]
+        del self.mods[mod.id]
 
         # Save
         self.write()

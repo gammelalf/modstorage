@@ -45,7 +45,7 @@ def mod(args):
     mod.write()
 
     if args.read:
-        if args.v
+        if args.v:
             with Zipfile() as jar:
                 with jar.open("mcmod.info") as info:
                     for key, value in json.load(info)[0].items():

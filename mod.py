@@ -49,6 +49,12 @@ class Mod:
 
     def __dict__(self):
         return dict(self.__data__)
+
+    def __getattr__(self, key):
+        if key == "id":
+            return self.__modid__
+        else:
+            return self.__getattribute__(key)
     
 
     def set(self, key, value, version=None):
