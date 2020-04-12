@@ -15,8 +15,10 @@ class Pack:
             self.__file__ = file
         elif os.path.exists(packs_path(file)):
             self.__file__ = packs_path(file)
-        else:
+        elif directory is None:
             raise FileNotFoundError(file)
+        else:
+            self.__file__ = packs_path(file)
 
         # Just load existing pack
         if directory is None:
@@ -39,7 +41,7 @@ class Pack:
         try:
             return self.__data__[key]
         except KeyError:
-            return super().__getattr__(key)
+            return self.__getattribute__(key)
 
 
     def _mod_file(self, mod):
@@ -75,9 +77,9 @@ class Pack:
 
         # Create mod's file and entry
         if config.getboolean("PACKS", "use symlinks"):
-            os.symlink(mod.file("link", self.version), self.__mod_file(mod))
+            os.symlink(mod.file("link", self.version), self._mod_file(mod))
         else:
-            shutil.copy(mod.file("jar", self.version), self.__mod_file(mod))
+            shutil.copy(mod.file("jar", self.version), self._mod_file(mod))
         self.mods[mod.id] = {"manually": manually, "dependants": []}
 
         # Save
@@ -105,7 +107,7 @@ class Pack:
             self.mods[dep]["dependants"].remove(mod.id)
 
         # Remove link and entry
-        os.remove(self.__mod_file(mod))
+        os.remove(self._mod_file(mod))
         del self.mods[mod.id]
 
         # Save
