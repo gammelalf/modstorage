@@ -4,7 +4,7 @@ import argparse, os
 from zipfile import ZipFile
 
 from modlib import Mod, Pack
-from modlib.base import config, valid_version
+import modlib.base as base
 
 
 def storage(args):
@@ -12,16 +12,17 @@ def storage(args):
         if os.path.exists(".modlib.config"):
             raise FileExistsError(".modlib.config")
         with open(".modlib.config", "w") as f:
-            f.write(config.DEFAULT)
+            f.write(base.config.DEFAULT)
 
 
 def main():
     def minecraft_version(string):
-        valid_version(string)
+        base.valid_version(string)
         return string
 
     # Init Parser
     parser = argparse.ArgumentParser()
+    hidden = parser.add_argument_group("hidden-commands")
     mod = parser.add_argument_group("mod-commands")
     pack = parser.add_argument_group("pack-commands")
 
@@ -35,6 +36,14 @@ def main():
     parser.add_argument("--pack",
                         type=Pack,
                         help="Use existing pack in commands")
+
+    # Hidden Commands
+    hidden.add_argument("--list-mods",
+                        action="store_true",
+                        help=argparse.SUPPRESS)
+    hidden.add_argument("--list-packs",
+                        action="store_true",
+                        help=argparse.SUPPRESS)
 
     # Mod Commands
     mod.add_argument("--new-mod",
@@ -71,6 +80,17 @@ def main():
 
     # Parse Arguments
     args = parser.parse_args()
+
+    if args.list_mods:
+        mods = os.listdir(base.storage_path())
+        mods = [mod.replace(" ", "\\ ") for mod in mods]
+        print(" ".join(mods))
+        return
+    if args.list_packs:
+        packs = os.listdir(base.packs_path())
+        packs = [pack.replace(" ", "\\") for pack in packs]
+        print(" ".join(packs))
+        return
 
     # Execute Mod Commands
     if args.new_mod:
