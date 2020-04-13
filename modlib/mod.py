@@ -114,7 +114,7 @@ class Mod:
         Same as save()
         """
         with open(base.storage_path(self.__modid__, "mod.json"), "w") as f:
-            json.dump(self.__data__, f, indent=4)
+            json.dump(self.__data__, f, **base.config.JSON)
     save = write
 
 

@@ -1,9 +1,9 @@
-import json   # dump, load
+import json   # load, dump
 import os     # symlink, remove, path
 import shutil # copy
 
-from .base import valid_version, config, packs_path
-from .mod import Mod
+from . import base
+from . import Mod
 
 class Pack:
 
@@ -13,12 +13,12 @@ class Pack:
         """
         if os.path.exists(file):
             self.__file__ = file
-        elif os.path.exists(packs_path(file)):
-            self.__file__ = packs_path(file)
+        elif os.path.exists(base.packs_path(file)):
+            self.__file__ = base.packs_path(file)
         elif directory is None:
             raise FileNotFoundError(file)
         else:
-            self.__file__ = packs_path(file)
+            self.__file__ = base.packs_path(file)
 
         # Just load existing pack
         if directory is None:
@@ -28,7 +28,7 @@ class Pack:
         # Create new one
         else:
             # Validate version
-            valid_version(version)
+            base.valid_version(version)
 
             # Init attributes
             self.__data__ = {"version": version, "directory": directory, "mods": {}}
@@ -76,7 +76,7 @@ class Pack:
             self.mods[dep]["dependants"].append(mod.id)
 
         # Create mod's file and entry
-        if config.getboolean("PACKS", "use symlinks"):
+        if base.config.getboolean("PACKS", "use symlinks"):
             os.symlink(mod.file("link", self.version), self._mod_file(mod))
         else:
             shutil.copy(mod.file("jar", self.version), self._mod_file(mod))
@@ -145,5 +145,5 @@ class Pack:
         Write a pack to its json file
         """
         with open(self.__file__, "w") as f:
-            json.dump(self.__data__, f, indent=4)
+            base.json.dump(self.__data__, f, **base.config.JSON)
     save = write

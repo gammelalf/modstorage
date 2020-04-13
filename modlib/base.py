@@ -1,4 +1,5 @@
 import os
+import json
 
 from configparser import ConfigParser
 
@@ -12,6 +13,11 @@ directory = ./storage
 [PACKS]
 directory = ./packs
 use symlinks = True
+
+[JSON]
+ensure ascii = True
+sort_keys = False
+compact = False
 """
 config.read_string(config.DEFAULT)
 config.read([
@@ -19,6 +25,19 @@ config.read([
         ".modlib.config"
     ])
 
+
+def json_config():
+    """
+    Get json.dump's kwargs from config
+    """
+    if config.getboolean("JSON", "compact", fallback=False):
+        kwargs = {"seperators": (",", ":")}
+    else:
+        kwargs = {"indent": 4}
+    kwargs["ensure_ascii"] = config.getboolean("JSON", "ensure ascii", fallback=True)
+    kwargs["sort_keys"] = config.getboolean("JSON", "sort keys", fallback=False)
+    return kwargs
+config.JSON = json_config()
 
 def storage_path(*paths):
     """
