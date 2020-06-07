@@ -145,5 +145,5 @@ class Pack:
         Write a pack to its json file
         """
         with open(self.__file__, "w") as f:
-            base.json.dump(self.__data__, f, **base.config.JSON)
+            json.dump(self.__data__, f, **base.config.JSON)
     save = write
