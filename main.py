@@ -81,15 +81,14 @@ def main():
     # Parse Arguments
     args = parser.parse_args()
 
+    # Execture Hidden Commands
     if args.list_mods:
         mods = os.listdir(base.storage_path())
-        mods = [mod.replace(" ", "\\ ") for mod in mods]
-        print(" ".join(mods))
+        print("\n".join(mods))
         return
     if args.list_packs:
         packs = os.listdir(base.packs_path())
-        packs = [pack.replace(" ", "\\") for pack in packs]
-        print(" ".join(packs))
+        print("\n".join(packs))
         return
 
     # Execute Mod Commands
