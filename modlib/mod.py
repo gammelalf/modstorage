@@ -2,8 +2,8 @@ import json
 import os
 import shutil
 
-from .base import storage_path
-from .base import valid_version
+from .util import storage_path
+from .util import valid_version
 from .config import config
 
 

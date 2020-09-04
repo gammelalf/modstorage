@@ -2,8 +2,8 @@ import json   # load, dump
 import os     # symlink, remove, path
 import shutil # copy
 
-from .base import valid_version
-from .base import packs_path
+from .util import valid_version
+from .util import packs_path
 from .config import config
 from .mod import Mod
 

@@ -3,7 +3,7 @@
 import argparse
 import os
 
-import modlib.base as base
+import modlib.util as base
 from modlib import Mod, Pack
 
 
