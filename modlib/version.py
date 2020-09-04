@@ -6,6 +6,12 @@ class Version(str):
     Class for minecraft versions
 
     It's just a string but with a regex check at construction.
+    This makes it interchangeable with normal strings and a lot of function which want versions will actual get
+    strings because the strings will be stored to and read from json.
+
+    So want is the point?
+    Code outside this module should only give version objects as the type annotations demand to ensure no invalid
+    versions are used. Once the string made it inside, it will be assumed to be a proper version.
     """
 
     PATTERN = re.compile(r"1\.\d{1,2}\.\d{1,2}")
