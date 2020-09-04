@@ -4,7 +4,7 @@ import shutil
 import typing
 
 from .version import Version
-from .util import storage_path
+from .path_util import storage_path
 from .config import config
 
 

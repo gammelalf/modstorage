@@ -3,10 +3,7 @@
 import argparse
 import os
 
-from modlib.version import Version
-from modlib.util import storage_path
-from modlib.util import packs_path
-from modlib import Mod, Pack
+from modlib import *
 
 
 def main():

@@ -4,7 +4,7 @@ import shutil # copy
 import typing
 
 from .version import Version
-from .util import packs_path
+from .path_util import packs_path
 from .config import config
 from .mod import Mod
 

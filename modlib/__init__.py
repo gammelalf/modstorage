@@ -1,9 +1,12 @@
-from modlib.mod import Mod
-from modlib.pack import Pack
+from .mod import Mod
+from .pack import Pack
 from .config import config
 from .version import Version
+from .path_util import storage_path, packs_path
 
 __all__ = ["Version",
            "Mod",
            "Pack",
-           "config"]
+           "config",
+           "storage_path",
+           "packs_path"]
