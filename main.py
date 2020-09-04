@@ -1,25 +1,13 @@
 #!/usr/bin/python3
 
-import argparse, os
-from zipfile import ZipFile
+import argparse
+import os
 
-from modlib import Mod, Pack
 import modlib.base as base
-
-
-def storage(args):
-    if args.config:
-        if os.path.exists(".modlib.config"):
-            raise FileExistsError(".modlib.config")
-        with open(".modlib.config", "w") as f:
-            f.write(base.config.DEFAULT)
+from modlib import Mod, Pack
 
 
 def main():
-    def minecraft_version(string):
-        base.valid_version(string)
-        return string
-
     # Init Parser
     parser = argparse.ArgumentParser()
     hidden = parser.add_argument_group("hidden-commands")
@@ -28,7 +16,7 @@ def main():
 
     # Optional Arguments
     parser.add_argument("--version",
-                        type=minecraft_version,
+                        type=base.valid_version,
                         help="Use this version in commands")
     parser.add_argument("--mod",
                         type=Mod,
