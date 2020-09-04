@@ -1,6 +1,10 @@
-import os, shutil, json
+import json
+import os
+import shutil
 
-from . import base
+from .base import storage_path
+from .base import valid_version
+from .config import config
 
 
 class Mod:
@@ -12,7 +16,7 @@ class Mod:
         """
         Create new mod, its required files and return it
         """
-        os.mkdir(base.storage_path(modid))
+        os.mkdir(storage_path(modid))
 
         mod = object.__new__(Mod)
         mod.__data__ = {"general": {"dependencies": [], "name": modid}}
@@ -37,7 +41,7 @@ class Mod:
         Load data from mod.json
         """
         self.__modid__ = modid
-        with open(base.storage_path(self.__modid__, "mod.json")) as f:
+        with open(storage_path(self.__modid__, "mod.json")) as f:
             self.__data__ = json.load(f)
         Mod.__loaded__[self.__modid__] = self
 
@@ -67,7 +71,7 @@ class Mod:
         if version is not None:
 
             # Validate version
-            base.valid_version(version)
+            valid_version(version)
 
             # Create version if needed
             if version not in self.__data__:
@@ -91,7 +95,7 @@ class Mod:
         if version is not None:
 
             # Validate version
-            base.valid_version(version)
+            valid_version(version)
 
             if version in self.__data__ and key in self.__data__[version]:
                 return self.__data__[version][key]
@@ -104,7 +108,7 @@ class Mod:
         """
         Call get() and join its return value to the path
         """
-        return base.storage_path(self.__modid__, self.get(key, version))
+        return storage_path(self.__modid__, self.get(key, version))
 
 
     def write(self):
@@ -113,8 +117,8 @@ class Mod:
 
         Same as save()
         """
-        with open(base.storage_path(self.__modid__, "mod.json"), "w") as f:
-            json.dump(self.__data__, f, **base.config.JSON)
+        with open(storage_path(self.__modid__, "mod.json"), "w") as f:
+            json.dump(self.__data__, f, **config.json)
     save = write
 
 
@@ -125,7 +129,7 @@ class Mod:
         and creates the symlink.
         """
         # Validate version
-        base.valid_version(version)
+        valid_version(version)
 
         # Get file's name
         name = os.path.basename(path)
