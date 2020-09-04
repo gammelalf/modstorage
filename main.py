@@ -3,7 +3,9 @@
 import argparse
 import os
 
-import modlib.util as base
+from modlib.version import Version
+from modlib.util import storage_path
+from modlib.util import packs_path
 from modlib import Mod, Pack
 
 
@@ -16,7 +18,7 @@ def main():
 
     # Optional Arguments
     parser.add_argument("--version",
-                        type=base.valid_version,
+                        type=Version,
                         help="Use this version in commands")
     parser.add_argument("--mod",
                         type=Mod,
@@ -71,11 +73,11 @@ def main():
 
     # Execture Hidden Commands
     if args.list_mods:
-        mods = os.listdir(base.storage_path())
+        mods = os.listdir(storage_path())
         print("\n".join(mods))
         return
     if args.list_packs:
-        packs = os.listdir(base.packs_path())
+        packs = os.listdir(packs_path())
         print("\n".join(packs))
         return
 

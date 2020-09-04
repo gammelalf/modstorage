@@ -3,7 +3,7 @@ import os     # symlink, remove, path
 import shutil # copy
 import typing
 
-from .util import valid_version
+from .version import Version
 from .util import packs_path
 from .config import config
 from .mod import Mod
@@ -23,7 +23,7 @@ class Pack:
     :type version: str
     """
 
-    def __init__(self, file: str, directory: str = None, version: str = None):
+    def __init__(self, file: str, directory: str = None, version: Version = None):
         """
         Load a pack from its json file or create a new one
         """
@@ -43,9 +43,6 @@ class Pack:
 
         # Create new one
         else:
-            # Validate version
-            valid_version(version)
-
             # Init attributes
             self.__data__ = {"version": version, "directory": directory, "mods": {}}
 

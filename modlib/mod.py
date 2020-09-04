@@ -3,8 +3,8 @@ import os
 import shutil
 import typing
 
+from .version import Version
 from .util import storage_path
-from .util import valid_version
 from .config import config
 
 
@@ -21,7 +21,7 @@ class Mod:
     __loaded__ = {}
 
     @staticmethod
-    def new_mod(modid: str) -> Mod:
+    def new_mod(modid: str): # -> Mod:
         """
         Create new mod, its required files and return it
 
@@ -74,7 +74,7 @@ class Mod:
         else:
             return self.__getattribute__(key)
     
-    def set(self, key: str, value: typing.Any, version: str = None) -> None:
+    def set(self, key: str, value: typing.Any, version: Version = None) -> None:
         """
         Set an attribute value for a version
         If no version is specified, it will be set in default.
@@ -85,13 +85,10 @@ class Mod:
         :param value: the value to set
         :type value: typing.Any
         :param version: the version in whose dict to set the value
-        :type version: str [Optional]
+        :type version: Version [Optional]
         """
         # Use specified version
         if version is not None:
-
-            # Validate version
-            valid_version(version)
 
             # Create version if needed
             if version not in self.__data__:
@@ -104,7 +101,7 @@ class Mod:
         else:
             self.__data__["general"][key] = value
 
-    def get(self, key: str, version: str = None) -> typing.Any:
+    def get(self, key: str, version: Version = None) -> typing.Any:
         """
         Get an version's attribute value
         If no version is specified or the versions does not have this attribute,
@@ -113,15 +110,12 @@ class Mod:
         :param key: the key whose value to get
         :type key: str
         :param version: the versions from whose dict to get the value
-        :type version: str
+        :type version: Version
         :return: the key's corresponding value
         :rtype: typing.Any
         """
         # Specified version has the attribute
         if version is not None:
-
-            # Validate version
-            valid_version(version)
 
             if version in self.__data__ and key in self.__data__[version]:
                 return self.__data__[version][key]
@@ -129,14 +123,14 @@ class Mod:
         # Didn't return yet? -> return the "general" value
         return self.__data__["general"][key]
 
-    def file(self, key: str, version: str = None) -> str:
+    def file(self, key: str, version: Version = None) -> str:
         """
         Call get() and join its return value to the storage's path
 
         :param key: the key whose file path to get
         :type key: str
         :param version: the versions from whose dict to get the file path
-        :type version: str
+        :type version: Version
         :return: the key's corresponding path
         :rtype: str
         """
@@ -152,7 +146,7 @@ class Mod:
             json.dump(self.__data__, f, **config.json)
     save = write
 
-    def set_file(self, path, version):
+    def set_file(self, path: str, version: Version) -> None:
         """
         Set the mod's file for a version
 
@@ -161,11 +155,8 @@ class Mod:
         :param path: current path to the file
         :type path: str
         :param version: the version the file is for
-        :type version: str
+        :type version: Version
         """
-        # Validate version
-        valid_version(version)
-
         # Get file's name
         name = os.path.basename(path)
 
