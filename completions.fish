@@ -14,6 +14,7 @@ complete -c modstorage -l pack       -r -a "(__get_packs)"
 complete -c modstorage -l new-mod    -r -d "Create new mod"
 complete -c modstorage -l add-file   -r -d "Add a jar file"
 complete -c modstorage -l add-dependencies -x -a "(__get_mods)"
+complete -c modstorage -l edit          -d "Edit the mod's file with the system default editor"
 complete -c modstorage -l read          -d "Experimental! Read the mcmod.info"
 
 complete -c modstorage -l new-pack   -r -d "Create new pack"

@@ -43,6 +43,9 @@ def main():
                      nargs="+",
                      metavar="MOD",
                      help="Add dependencies")
+    mod.add_argument("--edit",
+                     action="store_true",
+                     help="Edit the mod's file with the system default editor")
     mod.add_argument("--read",
                      action="store_true",
                      help="Experimental! Read the mcmod.info")
@@ -100,6 +103,8 @@ def main():
         if args.version and args.mod.get("dependencies") is args.mod.get("dependencies", args.version):
             args.mod.set("dependencies", [], args.version)
         args.mod.get("dependencies", args.version).extend(args.add_dependencies)
+    if args.edit:
+        os.system(f"editor {storage_path(args.mod.__modid__, 'mod.json')}")
     if args.read:
         parser.error("argument --read is not supported at the moment")
         with Zipfile() as jar:
